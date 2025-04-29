@@ -97,9 +97,76 @@
     display: flex;
     flex: 1;
   }
+  .welcome-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+    transition: opacity 0.5s ease-in-out;
+  }
+  .welcome-content {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    max-width: 600px;
+    margin: 20px;
+  }
+  .welcome-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+  .welcome-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  .start-button {
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .start-button:hover {
+    transform: translateY(-2px);
+    background: #45a049;
+  }
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
+
+<div id="welcome-screen" class="welcome-screen">
+    <div class="welcome-content">
+        <h1 class="welcome-title">Eco City: Urban Destiny</h1>
+        <p class="welcome-subtitle">
+            Welcome to Eco City! In this strategy game, you'll take on the role of a city planner,
+            balancing economic development with environmental protection to create a sustainable future.
+            <br><br>
+            Every decision you make will impact your city's GDP, pollution levels, health index, and research progress.
+            Plan wisely and let's build a better city together!
+        </p>
+        <button class="start-button" onclick="startGame()">Start Game</button>
+    </div>
+</div>
 
 <div class="game-container">
   <div class="main-content">
@@ -193,33 +260,38 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         data: [],
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
-        yAxisID: 'gdp'
+        yAxisID: 'gdp',
+        borderWidth: 2
       },
       {
         label: 'Pollution',
         data: [],
         borderColor: 'rgb(255, 99, 132)',
         tension: 0.1,
-        yAxisID: 'pollution'
+        yAxisID: 'pollution',
+        borderWidth: 2
       },
       {
         label: 'Health',
         data: [],
         borderColor: 'rgb(54, 162, 235)',
         tension: 0.1,
-        yAxisID: 'health'
+        yAxisID: 'health',
+        borderWidth: 2
       },
       {
         label: 'Research',
         data: [],
         borderColor: 'rgb(153, 102, 255)',
         tension: 0.1,
-        yAxisID: 'research'
+        yAxisID: 'research',
+        borderWidth: 2
       }
     ]
   },
   options: {
     responsive: true,
+    maintainAspectRatio: false,
     interaction: {
       mode: 'index',
       intersect: false,
@@ -227,24 +299,53 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
     plugins: {
       tooltip: {
         enabled: true,
-        mode: 'index'
+        mode: 'index',
+        titleFont: {
+          size: 14
+        },
+        bodyFont: {
+          size: 14
+        }
       },
       legend: {
         position: 'top',
         labels: {
           usePointStyle: true,
-          padding: 15
+          padding: 15,
+          font: {
+            size: 14
+          }
         }
       }
     },
     scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 14
+          }
+        },
+        grid: {
+          display: true,
+          color: 'rgba(0, 0, 0, 0.1)'
+        }
+      },
       gdp: {
         type: 'linear',
         display: true,
         position: 'left',
         title: {
           display: true,
-          text: 'GDP'
+          text: 'GDP',
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        },
+        ticks: {
+          font: {
+            size: 14
+          }
         },
         min: 0,
         max: 200
@@ -255,7 +356,16 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         position: 'right',
         title: {
           display: true,
-          text: 'Pollution'
+          text: 'Pollution',
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        },
+        ticks: {
+          font: {
+            size: 14
+          }
         },
         min: 0,
         max: 100,
@@ -269,7 +379,16 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         position: 'right',
         title: {
           display: true,
-          text: 'Health'
+          text: 'Health',
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        },
+        ticks: {
+          font: {
+            size: 14
+          }
         },
         min: 0,
         max: 100,
@@ -283,7 +402,16 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         position: 'right',
         title: {
           display: true,
-          text: 'Research'
+          text: 'Research',
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        },
+        ticks: {
+          font: {
+            size: 14
+          }
         },
         min: 0,
         max: 100,
@@ -495,6 +623,11 @@ function showMessage(message) {
   setTimeout(() => {
     messageDiv.remove();
   }, 2000);
+}
+
+function startGame() {
+    const welcomeScreen = document.getElementById('welcome-screen');
+    welcomeScreen.classList.add('hidden');
 }
 
 // Initialize game
