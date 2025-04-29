@@ -302,9 +302,164 @@
     font-size: 1.2rem;
     margin-top: 0.5rem;
   }
+  .intro-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f0f2f5, #e0f7fa);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: #333;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .intro-content {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    max-width: 800px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .intro-content h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+  }
+  .intro-content h2 {
+    font-size: 1.8rem;
+    color: #34495e;
+    margin: 2rem 0 1rem;
+  }
+  .intro-content p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+  .intro-content ul {
+    text-align: left;
+    max-width: 600px;
+    margin: 1rem auto;
+    padding-left: 2rem;
+  }
+  .intro-content li {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 0.5rem;
+  }
+  .city-grid {
+    margin: 2rem auto;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+  }
+  .city-grid td {
+    padding: 15px;
+    font-size: 1.5rem;
+    border: 1px solid #ddd;
+    width: 60px;
+    height: 60px;
+    text-align: center;
+  }
+  .intro-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  .intro-button {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #4CAF50;
+    color: white;
+  }
+  .intro-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .skip-intro {
+    background: transparent;
+    border: 2px solid #4CAF50;
+    color: #4CAF50;
+  }
+  .skip-intro:hover {
+    background: #4CAF50;
+    color: white;
+  }
 </style>
 </head>
 <body>
+
+<div id="intro-screen" class="intro-screen">
+    <div class="intro-content">
+        <h1>🌱 Eco City: Urban Destiny</h1>
+        <p>欢迎来到 <strong>Eco City</strong>！<br>
+        你是一位城市规划师，任务是 <strong>平衡发展与环保</strong>，带领你的城市走向可持续未来。</p>
+
+        <h2>🎯 游戏目标</h2>
+        <ul>
+            <li>通过建造不同区域（城市、乡村、工业、森林、海洋等）</li>
+            <li>控制污染、提升GDP、促进研究、保护居民健康</li>
+            <li>在 100 年内（10个回合）打造理想城市</li>
+            <li>保证居民健康>0，否则游戏失败！</li>
+        </ul>
+
+        <h2>🛠️ 游戏玩法</h2>
+        <ul>
+            <li>每10年一个回合，每回合你有<strong>2次建设机会</strong></li>
+            <li>可选择建造：
+                <ul>
+                    <li>🏙️ 城市区（Urban）：GDP与研究增长，但污染上升</li>
+                    <li>🌾 乡村区（Rural）：小幅度GDP与研究，污染少</li>
+                    <li>🏭 工业区（Industrial）：GDP暴涨，但污染严重</li>
+                    <li>🌳 森林（Forest）：净化污染，微小GDP</li>
+                    <li>🌊 海洋（Ocean）：可建离岸风电场</li>
+                    <li>🌬️ 离岸风电（Offshore）：清洁能源</li>
+                    <li>☀️ 可再生能源厂（Renewable）：无污染GDP</li>
+                </ul>
+            </li>
+            <li>注意：污染过高 ➔ 健康下降 ➔ 经济发展受阻！</li>
+        </ul>
+
+        <h2>📊 城市布局示意</h2>
+        <table class="city-grid">
+            <tr>
+                <td>🏙️</td>
+                <td>🌾</td>
+                <td>🌾</td>
+                <td>🏭</td>
+            </tr>
+            <tr>
+                <td>🏭</td>
+                <td>🏭</td>
+                <td>🌳</td>
+                <td>🌊</td>
+            </tr>
+            <tr>
+                <td>🌳</td>
+                <td>🌊</td>
+                <td>🚧</td>
+                <td>🚧</td>
+            </tr>
+        </table>
+
+        <div class="intro-buttons">
+            <button class="intro-button" onclick="closeIntroAndStart()">开始游戏</button>
+            <button class="intro-button skip-intro" onclick="skipIntroAndStart()">跳过介绍</button>
+        </div>
+    </div>
+</div>
 
 <div id="player-select-screen" class="player-select-screen">
     <div class="player-select-content">
@@ -1059,9 +1214,20 @@ function startWithPlayers() {
         `Welcome, ${player1Name}!`;
 }
 
-// 初始化时显示玩家选择界面
-window.onload = function() {
+function closeIntroAndStart() {
+    document.getElementById('intro-screen').style.display = 'none';
     document.getElementById('player-select-screen').style.display = 'flex';
+}
+
+function skipIntroAndStart() {
+    document.getElementById('intro-screen').style.display = 'none';
+    document.getElementById('player-select-screen').style.display = 'flex';
+}
+
+// 修改 window.onload
+window.onload = function() {
+    document.getElementById('intro-screen').style.display = 'flex';
+    document.getElementById('player-select-screen').style.display = 'none';
     document.getElementById('welcome-screen').style.display = 'none';
 };
 
