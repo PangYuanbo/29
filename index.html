@@ -192,33 +192,104 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         label: 'GDP',
         data: [],
         borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
+        tension: 0.1,
+        yAxisID: 'gdp'
       },
       {
         label: 'Pollution',
         data: [],
         borderColor: 'rgb(255, 99, 132)',
-        tension: 0.1
+        tension: 0.1,
+        yAxisID: 'pollution'
       },
       {
         label: 'Health',
         data: [],
         borderColor: 'rgb(54, 162, 235)',
-        tension: 0.1
+        tension: 0.1,
+        yAxisID: 'health'
       },
       {
         label: 'Research',
         data: [],
         borderColor: 'rgb(153, 102, 255)',
-        tension: 0.1
+        tension: 0.1,
+        yAxisID: 'research'
       }
     ]
   },
   options: {
     responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    plugins: {
+      tooltip: {
+        enabled: true,
+        mode: 'index'
+      },
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 15
+        }
+      }
+    },
     scales: {
-      y: {
-        beginAtZero: true
+      gdp: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: {
+          display: true,
+          text: 'GDP'
+        },
+        min: 0,
+        max: 200
+      },
+      pollution: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Pollution'
+        },
+        min: 0,
+        max: 100,
+        grid: {
+          drawOnChartArea: false
+        }
+      },
+      health: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Health'
+        },
+        min: 0,
+        max: 100,
+        grid: {
+          drawOnChartArea: false
+        }
+      },
+      research: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Research'
+        },
+        min: 0,
+        max: 100,
+        grid: {
+          drawOnChartArea: false
+        }
       }
     }
   }
