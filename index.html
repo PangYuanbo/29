@@ -17,9 +17,10 @@
   .game-container {
     display: flex;
     flex: 1;
+    flex-direction: column;
   }
   #map { 
-    flex: 2; 
+    flex: 1;
     display: grid; 
     grid-template-columns: repeat(4, 1fr); 
     gap: 10px; 
@@ -30,15 +31,17 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   }
   .charts-container {
+    flex: 1;
     padding: 20px;
     background: #fff;
     border-radius: 10px;
     margin: 0 20px 20px 20px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    min-height: 300px;
   }
   #statsChart {
-    width: 100%;
-    height: 300px;
+    width: 100% !important;
+    height: 100% !important;
   }
   .cell { 
     background: #e8f0fe; 
@@ -90,55 +93,61 @@
     background: #f9f9f9;
     border-radius: 5px;
   }
+  .main-content {
+    display: flex;
+    flex: 1;
+  }
 </style>
 </head>
 <body>
 
 <div class="game-container">
-  <div id="map"></div>
-  <div id="sidebar">
-    <div class="status-panel">
-      <h2>City Status</h2>
-      <div class="status-item">
-        <span class="label">Year:</span>
-        <span id="year" class="value">1980</span>
+  <div class="main-content">
+    <div id="map"></div>
+    <div id="sidebar">
+      <div class="status-panel">
+        <h2>City Status</h2>
+        <div class="status-item">
+          <span class="label">Year:</span>
+          <span id="year" class="value">1980</span>
+        </div>
+        <div class="status-item">
+          <span class="label">GDP:</span>
+          <span id="gdp" class="value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Pollution:</span>
+          <span id="pollution" class="value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Health:</span>
+          <span id="health" class="value">100</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Research:</span>
+          <span id="research" class="value">0</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Actions Left:</span>
+          <span id="actions" class="value">2</span>
+        </div>
       </div>
-      <div class="status-item">
-        <span class="label">GDP:</span>
-        <span id="gdp" class="value">0</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Pollution:</span>
-        <span id="pollution" class="value">0</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Health:</span>
-        <span id="health" class="value">100</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Research:</span>
-        <span id="research" class="value">0</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Actions Left:</span>
-        <span id="actions" class="value">2</span>
-      </div>
-    </div>
 
-    <h3>Actions</h3>
-    <button onclick="nextTurn()">End Turn</button>
+      <h3>Actions</h3>
+      <button onclick="nextTurn()">End Turn</button>
 
-    <h3>Build Options</h3>
-    <button onclick="selectBuild('Urban')">Urban District</button>
-    <button onclick="selectBuild('Rural')">Rural District</button>
-    <button onclick="selectBuild('Industrial')">Industrial District</button>
-    <button onclick="selectBuild('Forest')">Forest</button>
-    <button onclick="selectBuild('Renewable')">Renewable Plant</button>
-    <button onclick="selectBuild('Offshore')">Offshore Wind Farm</button>
+      <h3>Build Options</h3>
+      <button onclick="selectBuild('Urban')">Urban District</button>
+      <button onclick="selectBuild('Rural')">Rural District</button>
+      <button onclick="selectBuild('Industrial')">Industrial District</button>
+      <button onclick="selectBuild('Forest')">Forest</button>
+      <button onclick="selectBuild('Renewable')">Renewable Plant</button>
+      <button onclick="selectBuild('Offshore')">Offshore Wind Farm</button>
 
-    <div class="info-panel">
-      <h3>Current Selection</h3>
-      <p id="selected-info">No building selected</p>
+      <div class="info-panel">
+        <h3>Current Selection</h3>
+        <p id="selected-info">No building selected</p>
+      </div>
     </div>
   </div>
 </div>
