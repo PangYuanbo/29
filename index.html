@@ -611,9 +611,6 @@ let healthHistory = [];
 let researchHistory = [];
 let yearHistory = [];
 
-// 在全局变量区域添加累计GDP变量
-let cumulativeGDP = 0;
-
 // Create chart
 let statsChart = new Chart(document.getElementById('statsChart'), {
   type: 'line',
@@ -625,32 +622,28 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         data: [],
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
-        borderWidth: 2,
-        yAxisID: 'gdp'
+        borderWidth: 2
       },
       {
         label: 'Pollution',
         data: [],
         borderColor: 'rgb(255, 99, 132)',
         tension: 0.1,
-        borderWidth: 2,
-        yAxisID: 'metrics'
+        borderWidth: 2
       },
       {
         label: 'Health',
         data: [],
         borderColor: 'rgb(54, 162, 235)',
         tension: 0.1,
-        borderWidth: 2,
-        yAxisID: 'metrics'
+        borderWidth: 2
       },
       {
         label: 'Research',
         data: [],
         borderColor: 'rgb(153, 102, 255)',
         tension: 0.1,
-        borderWidth: 2,
-        yAxisID: 'metrics'
+        borderWidth: 2
       }
     ]
   },
@@ -695,35 +688,13 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
           color: 'rgba(0, 0, 0, 0.1)'
         }
       },
-      gdp: {
+      y: {
         type: 'linear',
         display: true,
         position: 'left',
         title: {
           display: true,
-          text: 'GDP',
-          font: {
-            size: 14,
-            weight: 'bold'
-          }
-        },
-        ticks: {
-          font: {
-            size: 14
-          }
-        },
-        min: 0,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)'
-        }
-      },
-      metrics: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        title: {
-          display: true,
-          text: 'Other Metrics',
+          text: 'Value',
           font: {
             size: 14,
             weight: 'bold'
@@ -737,7 +708,7 @@ let statsChart = new Chart(document.getElementById('statsChart'), {
         min: 0,
         max: 100,
         grid: {
-          display: false
+          color: 'rgba(0, 0, 0, 0.1)'
         }
       }
     }
@@ -765,11 +736,9 @@ let currentPlayer = 1;
 
 function init() {
     const map = document.getElementById('map');
+    // 清空地图
     map.innerHTML = '';
     cells = [];
-    
-    // 重置累计GDP
-    cumulativeGDP = 0;
     
     // 初始化单元格
     initialCells.forEach((name, idx) => {
@@ -786,7 +755,7 @@ function init() {
     document.getElementById('selected-info').innerText = 'No building selected';
     
     // 初始化图表数据
-    gdpHistory = [cumulativeGDP];
+    gdpHistory = [gdp];
     pollutionHistory = [pollution];
     healthHistory = [health];
     researchHistory = [research];
@@ -830,26 +799,23 @@ function build(idx) {
 }
 
 function updateStats() {
-  let turnGDP = 0;
+  gdp = 0;
   pollution = 0;
   let turnResearch = 0;
   cells.forEach(c => {
     const effect = effectsMap[c];
     if (effect) {
-      turnGDP += effect.gdp;
+      gdp += effect.gdp;
       pollution += effect.pollution;
       turnResearch += effect.research || 0;
     }
   });
 
   if (health < 50) {
-    turnGDP = Math.floor(turnGDP / 2);
+    gdp = Math.floor(gdp / 2);
   }
   
-  // 更新累计GDP
-  cumulativeGDP += turnGDP;
-  
-  document.getElementById('gdp').innerText = cumulativeGDP;
+  document.getElementById('gdp').innerText = gdp;
   document.getElementById('pollution').innerText = pollution;
   document.getElementById('health').innerText = health;
   document.getElementById('research').innerText = research;
@@ -871,7 +837,7 @@ function selectBuild(name) {
   
   const info = effectsMap[name];
   if (info) {
-    const previewGDP = cumulativeGDP + info.gdp;
+    const previewGDP = gdp + info.gdp;
     const previewPollution = pollution + info.pollution;
     const previewHealth = health - Math.floor(previewPollution / 5);
     const previewResearch = research + (info.research || 0);
@@ -895,24 +861,21 @@ function nextTurn() {
   year += 10;
   actions = 2;
   
-  let turnGDP = 0;
+  gdp = 0;
   pollution = 0;
   let turnResearch = 0;
   cells.forEach(c => {
     const effect = effectsMap[c];
     if (effect) {
-      turnGDP += effect.gdp;
+      gdp += effect.gdp;
       pollution += effect.pollution;
       turnResearch += effect.research || 0;
     }
   });
 
   if (health < 50) {
-    turnGDP = Math.floor(turnGDP / 2);
+    gdp = Math.floor(gdp / 2);
   }
-  
-  // 更新累计GDP
-  cumulativeGDP += turnGDP;
   
   health -= Math.floor(pollution / 5);
   research += turnResearch;
@@ -922,14 +885,14 @@ function nextTurn() {
     return;
   }
   
-  // 更新历史数组时使用累计GDP
-  gdpHistory.push(cumulativeGDP);
+  // Update history arrays
+  gdpHistory.push(gdp);
   pollutionHistory.push(pollution);
   healthHistory.push(health);
   researchHistory.push(research);
   yearHistory.push(year);
   
-  // 更新图表
+  // Update chart
   statsChart.data.labels = yearHistory;
   statsChart.data.datasets[0].data = gdpHistory;
   statsChart.data.datasets[1].data = pollutionHistory;
@@ -943,7 +906,7 @@ function nextTurn() {
   });
   document.getElementById('selected-info').innerText = 'No building selected';
   
-  document.getElementById('gdp').innerText = cumulativeGDP;
+  document.getElementById('gdp').innerText = gdp;
   document.getElementById('pollution').innerText = pollution;
   document.getElementById('health').innerText = health;
   document.getElementById('research').innerText = research;
@@ -1007,7 +970,7 @@ function showGameOver() {
 
 function calculateFinalScore() {
     // 根据各项指标计算最终得分
-    const gdpScore = cumulativeGDP * 2;
+    const gdpScore = gdp * 2;
     const healthScore = health * 3;
     const pollutionPenalty = pollution * 2;
     const researchBonus = research * 4;
