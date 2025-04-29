@@ -150,6 +150,80 @@
     opacity: 0;
     pointer-events: none;
   }
+  .game-over-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+  }
+  .game-over-content {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    max-width: 800px;
+    margin: 20px;
+  }
+  .game-over-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #4CAF50;
+  }
+  .final-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+    text-align: left;
+  }
+  .stat-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  .stat-label {
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+    color: #fff;
+    margin-top: 0.5rem;
+  }
+  .final-score {
+    font-size: 2rem;
+    color: #4CAF50;
+    margin: 2rem 0;
+  }
+  .restart-button {
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .restart-button:hover {
+    transform: translateY(-2px);
+    background: #45a049;
+  }
+  .final-chart-container {
+    width: 100%;
+    height: 300px;
+    margin: 2rem 0;
+  }
 </style>
 </head>
 <body>
@@ -165,6 +239,37 @@
             Plan wisely and let's build a better city together!
         </p>
         <button class="start-button" onclick="startGame()">Start Game</button>
+    </div>
+</div>
+
+<div id="game-over-screen" class="game-over-screen">
+    <div class="game-over-content">
+        <h1 class="game-over-title">Game Over!</h1>
+        <div class="final-stats">
+            <div class="stat-item">
+                <div class="stat-label">Final GDP</div>
+                <div id="final-gdp" class="stat-value">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Final Health</div>
+                <div id="final-health" class="stat-value">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Final Pollution</div>
+                <div id="final-pollution" class="stat-value">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Research Progress</div>
+                <div id="final-research" class="stat-value">0</div>
+            </div>
+        </div>
+        <div class="final-score">
+            Final Score: <span id="final-total-score">0</span>
+        </div>
+        <div class="final-chart-container">
+            <canvas id="finalStatsChart"></canvas>
+        </div>
+        <button class="restart-button" onclick="restartGame()">Play Again</button>
     </div>
 </div>
 
@@ -545,8 +650,8 @@ function selectBuild(name) {
 }
 
 function nextTurn() {
-  if (year >= 2070) {
-    alert('Game Over! You reached 2070!');
+  if (year >= 2070 || health <= 0) {
+    showGameOver();
     return;
   }
   year += 10;
@@ -628,6 +733,133 @@ function showMessage(message) {
 function startGame() {
     const welcomeScreen = document.getElementById('welcome-screen');
     welcomeScreen.classList.add('hidden');
+}
+
+function showGameOver() {
+    const gameOverScreen = document.getElementById('game-over-screen');
+    gameOverScreen.style.display = 'flex';
+    
+    // 更新最终统计数据
+    document.getElementById('final-gdp').textContent = gdp;
+    document.getElementById('final-health').textContent = health;
+    document.getElementById('final-pollution').textContent = pollution;
+    document.getElementById('final-research').textContent = research;
+    
+    // 计算最终得分
+    const finalScore = calculateFinalScore();
+    document.getElementById('final-total-score').textContent = finalScore;
+    
+    // 创建最终统计图表
+    createFinalChart();
+}
+
+function calculateFinalScore() {
+    // 根据各项指标计算最终得分
+    const gdpScore = gdp * 2;
+    const healthScore = health * 3;
+    const pollutionPenalty = pollution * 2;
+    const researchBonus = research * 4;
+    
+    return Math.max(0, gdpScore + healthScore + researchBonus - pollutionPenalty);
+}
+
+function createFinalChart() {
+    const ctx = document.getElementById('finalStatsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: yearHistory,
+            datasets: [
+                {
+                    label: 'GDP',
+                    data: gdpHistory,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Health',
+                    data: healthHistory,
+                    borderColor: 'rgb(54, 162, 235)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Pollution',
+                    data: pollutionHistory,
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Research',
+                    data: researchHistory,
+                    borderColor: 'rgb(153, 102, 255)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#fff',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#fff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#fff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function restartGame() {
+    // 重置游戏状态
+    gdp = 0;
+    pollution = 0;
+    health = 100;
+    research = 0;
+    actions = 2;
+    year = 1980;
+    
+    // 清空历史数据
+    gdpHistory = [];
+    pollutionHistory = [];
+    healthHistory = [];
+    researchHistory = [];
+    yearHistory = [];
+    
+    // 重置图表
+    statsChart.data.labels = [];
+    statsChart.data.datasets.forEach(dataset => {
+        dataset.data = [];
+    });
+    statsChart.update();
+    
+    // 隐藏游戏结束界面
+    document.getElementById('game-over-screen').style.display = 'none';
+    
+    // 重新初始化游戏
+    init();
 }
 
 // Initialize game
