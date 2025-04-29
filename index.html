@@ -404,35 +404,35 @@
 <div id="intro-screen" class="intro-screen">
     <div class="intro-content">
         <h1>🌱 Eco City: Urban Destiny</h1>
-        <p>欢迎来到 <strong>Eco City</strong>！<br>
-        你是一位城市规划师，任务是 <strong>平衡发展与环保</strong>，带领你的城市走向可持续未来。</p>
+        <p>Welcome to <strong>Eco City</strong>!<br>
+        As a city planner, your mission is to <strong>balance development and environmental protection</strong>, leading your city towards a sustainable future.</p>
 
-        <h2>🎯 游戏目标</h2>
+        <h2>🎯 Game Objectives</h2>
         <ul>
-            <li>通过建造不同区域（城市、乡村、工业、森林、海洋等）</li>
-            <li>控制污染、提升GDP、促进研究、保护居民健康</li>
-            <li>在 100 年内（10个回合）打造理想城市</li>
-            <li>保证居民健康>0，否则游戏失败！</li>
+            <li>Build different districts (Urban, Rural, Industrial, Forest, Ocean)</li>
+            <li>Control pollution, boost GDP, advance research, and maintain public health</li>
+            <li>Create an ideal city within 100 years (10 turns)</li>
+            <li>Keep health above 0 or the game ends!</li>
         </ul>
 
-        <h2>🛠️ 游戏玩法</h2>
+        <h2>🛠️ How to Play</h2>
         <ul>
-            <li>每10年一个回合，每回合你有<strong>2次建设机会</strong></li>
-            <li>可选择建造：
+            <li>Each turn represents 10 years, with <strong>2 building actions</strong> per turn</li>
+            <li>Available buildings:
                 <ul>
-                    <li>🏙️ 城市区（Urban）：GDP与研究增长，但污染上升</li>
-                    <li>🌾 乡村区（Rural）：小幅度GDP与研究，污染少</li>
-                    <li>🏭 工业区（Industrial）：GDP暴涨，但污染严重</li>
-                    <li>🌳 森林（Forest）：净化污染，微小GDP</li>
-                    <li>🌊 海洋（Ocean）：可建离岸风电场</li>
-                    <li>🌬️ 离岸风电（Offshore）：清洁能源</li>
-                    <li>☀️ 可再生能源厂（Renewable）：无污染GDP</li>
+                    <li>🏙️ Urban District: High GDP & research, moderate pollution</li>
+                    <li>🌾 Rural District: Low GDP & research, minimal pollution</li>
+                    <li>🏭 Industrial District: Massive GDP boost, heavy pollution</li>
+                    <li>🌳 Forest: Reduces pollution, minimal GDP</li>
+                    <li>🌊 Ocean: Base for offshore wind farms</li>
+                    <li>🌬️ Offshore Wind Farm: Clean energy production</li>
+                    <li>☀️ Renewable Plant: Pollution-free GDP</li>
                 </ul>
             </li>
-            <li>注意：污染过高 ➔ 健康下降 ➔ 经济发展受阻！</li>
+            <li>Warning: High Pollution ➔ Health Decline ➔ Economic Slowdown!</li>
         </ul>
 
-        <h2>📊 城市布局示意</h2>
+        <h2>📊 City Layout Example</h2>
         <table class="city-grid">
             <tr>
                 <td>🏙️</td>
@@ -454,9 +454,16 @@
             </tr>
         </table>
 
+        <h2>🏆 Victory Conditions</h2>
+        <ul>
+            <li>Achieve the highest possible score by 2070</li>
+            <li>Balance all city metrics effectively</li>
+            <li>Maintain health above critical levels</li>
+        </ul>
+
         <div class="intro-buttons">
-            <button class="intro-button" onclick="closeIntroAndStart()">开始游戏</button>
-            <button class="intro-button skip-intro" onclick="skipIntroAndStart()">跳过介绍</button>
+            <button class="intro-button" onclick="closeIntroAndStart()">Start Game</button>
+            <button class="intro-button skip-intro" onclick="skipIntroAndStart()">Skip Tutorial</button>
         </div>
     </div>
 </div>
