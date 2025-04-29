@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco City: Urban Destiny</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    display: flex; 
+    flex-direction: column;
+    height: 100vh;
+    background-color: #f0f2f5; 
+  }
+  .game-container {
+    display: flex;
+    flex: 1;
+  }
+  #map { 
+    flex: 2; 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 10px; 
+    padding: 20px; 
+    background: #fff;
+    border-radius: 10px;
+    margin: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+  .charts-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    margin: 0 20px 20px 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+  #statsChart {
+    width: 100%;
+    height: 300px;
+  }
+  .cell { 
+    background: #e8f0fe; 
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s;
+  }
+  .cell:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  #sidebar { 
+    flex: 1; 
+    background: #fff; 
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+  button { 
+    margin: 5px 0; 
+    padding: 8px 15px; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.3s;
+  }
+  button:hover {
+    background: #f5f5f5;
+  }
+  button.selected {
+    background: #4CAF50;
+    color: white;
+    border-color: #45a049;
+  }
+  .status-item {
+    margin: 10px 0;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .info-panel {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <div id="map"></div>
+  <div id="sidebar">
+    <div class="status-panel">
+      <h2>City Status</h2>
+      <div class="status-item">
+        <span class="label">Year:</span>
+        <span id="year" class="value">1980</span>
+      </div>
+      <div class="status-item">
+        <span class="label">GDP:</span>
+        <span id="gdp" class="value">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Pollution:</span>
+        <span id="pollution" class="value">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Health:</span>
+        <span id="health" class="value">100</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Research:</span>
+        <span id="research" class="value">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Actions Left:</span>
+        <span id="actions" class="value">2</span>
+      </div>
+    </div>
+
+    <h3>Actions</h3>
+    <button onclick="nextTurn()">End Turn</button>
+
+    <h3>Build Options</h3>
+    <button onclick="selectBuild('Urban')">Urban District</button>
+    <button onclick="selectBuild('Rural')">Rural District</button>
+    <button onclick="selectBuild('Industrial')">Industrial District</button>
+    <button onclick="selectBuild('Forest')">Forest</button>
+    <button onclick="selectBuild('Renewable')">Renewable Plant</button>
+    <button onclick="selectBuild('Offshore')">Offshore Wind Farm</button>
+
+    <div class="info-panel">
+      <h3>Current Selection</h3>
+      <p id="selected-info">No building selected</p>
+    </div>
+  </div>
+</div>
+
+<div class="charts-container">
+  <canvas id="statsChart"></canvas>
+</div>
+
+<script>
+const effectsMap = {
+  'Urban': { gdp: 6, pollution: 3, research: 3, description: 'Provides GDP and research, generates pollution' },
+  'Rural': { gdp: 2, pollution: 1, research: 1, description: 'Provides small GDP and research, minimal pollution' },
+  'Industrial': { gdp: 10, pollution: 10, research: 0, description: 'High GDP output but heavy pollution' },
+  'Wasteland': { gdp: 0, pollution: 0, research: 0, description: 'No effect' },
+  'Forest': { gdp: 0.5, pollution: -3, research: 0, description: 'Small GDP, reduces pollution' },
+  'Ocean': { gdp: 0.5, pollution: -3, research: 0, description: 'Small GDP, reduces pollution, can build offshore wind farms' },
+  'Renewable': { gdp: 5, pollution: 0, research: 0, description: 'Decent GDP, no pollution' },
+  'Offshore': { gdp: 5, pollution: 0, research: 0, description: 'Decent GDP, no pollution' }
+};
+
+let selectedBuild = null;
+let cells = [];
+let gdp = 0, pollution = 0, health = 100, research = 0;
+let actions = 2;
+let year = 1980;
+let unlockedTech = {};
+
+// Add stats history arrays
+let gdpHistory = [];
+let pollutionHistory = [];
+let healthHistory = [];
+let researchHistory = [];
+let yearHistory = [];
+
+// Create chart
+let statsChart = new Chart(document.getElementById('statsChart'), {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'GDP',
+        data: [],
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      },
+      {
+        label: 'Pollution',
+        data: [],
+        borderColor: 'rgb(255, 99, 132)',
+        tension: 0.1
+      },
+      {
+        label: 'Health',
+        data: [],
+        borderColor: 'rgb(54, 162, 235)',
+        tension: 0.1
+      },
+      {
+        label: 'Research',
+        data: [],
+        borderColor: 'rgb(153, 102, 255)',
+        tension: 0.1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+// Initialize cells
+const initialCells = [
+  'Urban', 'Rural', 'Rural',
+  'Industrial', 'Industrial', 'Industrial',
+  'Wasteland', 'Wasteland',
+  'Forest', 'Forest',
+  'Ocean', 'Ocean'
+];
+
+function init() {
+  const map = document.getElementById('map');
+  initialCells.forEach((name, idx) => {
+    const div = document.createElement('div');
+    div.className = 'cell';
+    div.innerText = name;
+    div.dataset.index = idx;
+    div.onclick = () => build(idx);
+    map.appendChild(div);
+    cells.push(name);
+  });
+  updateStats();
+  document.getElementById('selected-info').innerText = 'No building selected';
+  
+  // Initialize chart with starting values
+  gdpHistory.push(gdp);
+  pollutionHistory.push(pollution);
+  healthHistory.push(health);
+  researchHistory.push(research);
+  yearHistory.push(year);
+  
+  statsChart.data.labels = yearHistory;
+  statsChart.data.datasets[0].data = gdpHistory;
+  statsChart.data.datasets[1].data = pollutionHistory;
+  statsChart.data.datasets[2].data = healthHistory;
+  statsChart.data.datasets[3].data = researchHistory;
+  statsChart.update();
+}
+
+function build(idx) {
+  if (!selectedBuild || actions <= 0) {
+    alert('Please select a building type and ensure you have actions left!');
+    return;
+  }
+  
+  if (cells[idx] === 'Ocean' && selectedBuild !== 'Offshore') {
+    alert('Ocean tiles can only build Offshore Wind Farms!');
+    return;
+  }
+  
+  if (cells[idx] !== 'Ocean' && selectedBuild === 'Offshore') {
+    alert('Offshore Wind Farms can only be built on Ocean!');
+    return;
+  }
+  
+  if (health < 50) {
+    alert('Warning: Health below 50, building efficiency will be halved!');
+  }
+  
+  const oldCell = cells[idx];
+  cells[idx] = selectedBuild;
+  document.querySelectorAll('.cell')[idx].innerText = selectedBuild;
+  actions--;
+  updateStats();
+  showMessage(`Replaced ${oldCell} with ${selectedBuild}`);
+}
+
+function updateStats() {
+  gdp = 0;
+  pollution = 0;
+  let turnResearch = 0;
+  cells.forEach(c => {
+    const effect = effectsMap[c];
+    if (effect) {
+      gdp += effect.gdp;
+      pollution += effect.pollution;
+      turnResearch += effect.research || 0;
+    }
+  });
+
+  if (health < 50) {
+    gdp = Math.floor(gdp / 2);
+  }
+  
+  document.getElementById('gdp').innerText = gdp;
+  document.getElementById('pollution').innerText = pollution;
+  document.getElementById('health').innerText = health;
+  document.getElementById('research').innerText = research;
+  document.getElementById('actions').innerText = actions;
+  document.getElementById('year').innerText = year;
+}
+
+function selectBuild(name) {
+  document.querySelectorAll('button').forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  
+  const button = document.querySelector(`button[onclick="selectBuild('${name}')"]`);
+  if (button) {
+    button.classList.add('selected');
+  }
+  
+  selectedBuild = name;
+  
+  const info = effectsMap[name];
+  if (info) {
+    const previewGDP = gdp + info.gdp;
+    const previewPollution = pollution + info.pollution;
+    const previewHealth = health - Math.floor(previewPollution / 5);
+    const previewResearch = research + (info.research || 0);
+    
+    document.getElementById('selected-info').innerHTML = `
+      <strong>${name}</strong><br>
+      GDP: +${info.gdp} (Total: ${previewGDP})<br>
+      Pollution: ${info.pollution > 0 ? '+' : ''}${info.pollution} (Total: ${previewPollution})<br>
+      Research: ${info.research ? '+' + info.research : '0'} (Total: ${previewResearch})<br>
+      Estimated Health: ${previewHealth}<br>
+      ${info.description}
+    `;
+  }
+}
+
+function nextTurn() {
+  if (year >= 2070) {
+    alert('Game Over! You reached 2070!');
+    return;
+  }
+  year += 10;
+  actions = 2;
+  
+  gdp = 0;
+  pollution = 0;
+  let turnResearch = 0;
+  cells.forEach(c => {
+    const effect = effectsMap[c];
+    if (effect) {
+      gdp += effect.gdp;
+      pollution += effect.pollution;
+      turnResearch += effect.research || 0;
+    }
+  });
+
+  if (health < 50) {
+    gdp = Math.floor(gdp / 2);
+  }
+  
+  health -= Math.floor(pollution / 5);
+  research += turnResearch;
+  
+  if (health <= 0) {
+    alert('City failed! Health reached zero!');
+    return;
+  }
+  
+  // Update history arrays
+  gdpHistory.push(gdp);
+  pollutionHistory.push(pollution);
+  healthHistory.push(health);
+  researchHistory.push(research);
+  yearHistory.push(year);
+  
+  // Update chart
+  statsChart.data.labels = yearHistory;
+  statsChart.data.datasets[0].data = gdpHistory;
+  statsChart.data.datasets[1].data = pollutionHistory;
+  statsChart.data.datasets[2].data = healthHistory;
+  statsChart.data.datasets[3].data = researchHistory;
+  statsChart.update();
+  
+  selectedBuild = null;
+  document.querySelectorAll('button').forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  document.getElementById('selected-info').innerText = 'No building selected';
+  
+  document.getElementById('gdp').innerText = gdp;
+  document.getElementById('pollution').innerText = pollution;
+  document.getElementById('health').innerText = health;
+  document.getElementById('research').innerText = research;
+  document.getElementById('actions').innerText = actions;
+  document.getElementById('year').innerText = year;
+}
+
+function showMessage(message) {
+  const messageDiv = document.createElement('div');
+  messageDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+  `;
+  messageDiv.textContent = message;
+  document.body.appendChild(messageDiv);
+  
+  setTimeout(() => {
+    messageDiv.remove();
+  }, 2000);
+}
+
+// Initialize game
+init();
+</script>
+
+</body>
+</html>
